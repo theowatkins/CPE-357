@@ -3,7 +3,7 @@ CFLAGS = -std=c99 -Wall -pedantic -g
 LD = clang
 LDFLAGS = 
 
-all: parseline.o funcs_parse.o
+parseline: parseline.o funcs_parse.o
 	$(LD) $(LDFLAGS) -o parseline parseline.o funcs_parse.o
 
 parseline.o: parseline.c parseline.h
