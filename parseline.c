@@ -1,7 +1,8 @@
 /*This is the driver C file for parseline*/
 
 #include "parseline.h"
-#include "funcs_parse.h"
+#include "stage_funcs.h"
+#include "errors.h"
 
 int main(){
     int c = 0;
@@ -9,10 +10,10 @@ int main(){
     int line_count = 0;
     int num_of_stages = 0;
     char line[LINE_MAX] = {0};
-    stage *stages[STAGE_MAX] = {0}; /* Does this need to be {NULL}?*/
+    stage *stages[STAGE_MAX] = {NULL}; /* Does this need to be {NULL}?*/
     char ins[STAGE_MAX][IN_LEN] = {{0}};
     char outs[STAGE_MAX][OUT_LEN] = {{0}};
-    char *full_stages[STAGE_MAX];
+    char *full_stages[STAGE_MAX] = {NULL};
 
     printf("line: ");
     
@@ -27,9 +28,7 @@ int main(){
         }
         /*If the next char results in buffer of length LINE_MAX*/
         else{
-            fprintf(stderr, "command too long\n");
-            print_fail();
-            exit(-1);
+            print_long_command(stages, full_stages); 
         }
     }
 
@@ -38,7 +37,7 @@ int main(){
      * because strtok(3) will ignore the pipe if there are no
      * characters after*/
     if(line[line_count - 1] == '|'){
-        print_null_cmd();
+        print_null_cmd(stages, full_stages);
     }
 
 
@@ -65,9 +64,7 @@ int main(){
             if(num_of_stages <= STAGE_MAX)
                 stages[num_of_stages] = calloc(1, sizeof(stage));
             else{
-                fprintf(stderr, "pipeline too deep\n");
-                print_fail();
-                exit(-2);
+                print_long_pipe(stages, full_stages);
             }
         }
     }
@@ -108,14 +105,12 @@ int main(){
 
         /*Store full_stage elsewhere so that the char * will be untouched by 
          *the strtok(3) calls in init_stage*/
-        full_stages[i] = calloc(strlen(stages[i]->full_stage) + 1, sizeof(char));
+        full_stages[i] = calloc(strlen(stages[i]->full_stage) + 1,
+             sizeof(char));
         strncpy(full_stages[i], stages[i]->full_stage, 
             strlen(stages[i]->full_stage));
 
-        /* 
-         **/
-        printf("i: %d, num_of_stages: %d\n", i , num_of_stages);
-        init_stage(stages[i], i, num_of_stages - 1);
+        init_stage(stages[i], i, num_of_stages - 1, stages, full_stages);
 
         /*Reset full_stage field with the previously saved value*/
         stages[i]->full_stage = full_stages[i];

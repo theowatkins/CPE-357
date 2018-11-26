@@ -5,7 +5,7 @@ DEBUG= -g
 
 all: parseline
 
-parseline: parseline.o funcs_parse.o
+parseline: parseline.o stage_funcs.o errors.o
 	$(CC) $(DEBUG) $(LDFLAGS) -o $@ $^
 
 %.o: %.c
