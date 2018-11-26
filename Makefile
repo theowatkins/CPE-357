@@ -1,13 +1,15 @@
-CC = clang
-CFLAGS = -std=c99 -Wall -pedantic -g
-LD = clang
-LDFLAGS = 
+CC=clang
+CFLAGS= -std=c99 -Wall -pedantic
+LDFLAGS= 
+DEBUG= -g
+
+all: parseline
 
 parseline: parseline.o funcs_parse.o
-	$(LD) $(LDFLAGS) -o parseline parseline.o funcs_parse.o
+	$(CC) $(DEBUG) $(LDFLAGS) -o $@ $^
 
-parseline.o: parseline.c parseline.h
-	$(CC) $(CFLAGS) -c -o parseline.o parseline.c
+%.o: %.c
+	$(CC) $(DEBUG) $(CFLAGS) -c -o $@ $^
 
-funcs_parse.o: funcs_parse.c funcs_parse.h
-	$(CC) $(CFLAGS) -c -o funcs_parse.o funcs_parse.c
+clean: 
+	$(RM) parseline  *.o 

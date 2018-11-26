@@ -1,3 +1,5 @@
+/*This is the driver C file for parseline*/
+
 #include "parseline.h"
 #include "funcs_parse.h"
 
@@ -7,42 +9,52 @@ int main(){
     int line_count = 0;
     int num_of_stages = 0;
     char line[LINE_MAX] = {0};
-    stage *stages[STAGE_MAX] = {0};
+    stage *stages[STAGE_MAX] = {0}; /* Does this need to be {NULL}?*/
     char ins[STAGE_MAX][IN_LEN] = {{0}};
     char outs[STAGE_MAX][OUT_LEN] = {{0}};
     char *full_stages[STAGE_MAX];
 
     printf("line: ");
     
+    /*Get each character from stdin if it's not EOF or newline*/
     while((c = getchar()) != EOF && c != '\n'){
-        /*leaves space for line to be null terminated so 
+        /* Leaves space for line to be null terminated so 
          * that strtok(3) can properly execute on it*/
         if(line_count < LINE_MAX - 1){
-            line[line_count] = c;//fill buffer
+            /*Fill the buffer*/
+            line[line_count] = c;
             line_count++;
         }
+        /*If the next char results in buffer of length LINE_MAX*/
         else{
             fprintf(stderr, "command too long\n");
             print_fail();
-            exit(1);
+            exit(-1);
         }
     }
 
-    /*checks if last character in line is a pipe 
-     * because strtok(3) will ignore it if there are no
-     * characters after*/
-    if(line[line_count - 1] == '|')
-        print_null_cmd();
 
-    //calloc space for first stage
+    /* If last char is a pipe and handles as invlaid null command error 
+     * because strtok(3) will ignore the pipe if there are no
+     * characters after*/
+    if(line[line_count - 1] == '|'){
+        print_null_cmd();
+    }
+
+
+    /*This section handles parsing the input into separate pipeline commands
+     *and allocates space for each stage (struct) and sets the full_stage 
+     *accordingly*/
+
+    /* calloc space for first stage -> there always is a stage 0*/
     stages[num_of_stages] = calloc(1, sizeof(stage));
-    /*set first stage's full_stage field to be the entire
-     * string before the first pipeline character*/
-    if((stages[num_of_stages]->full_stage = 
-                strtok(line, "|")) != NULL){
+
+    /*set first stage's full_stage field to be the entire char * 
+     *before the first pipeline character*/
+    if((stages[num_of_stages]->full_stage = strtok(line, "|")) != NULL){
         num_of_stages++;
-        //calloc space for the next stage
         stages[num_of_stages] = calloc(1, sizeof(stage));
+        
         /*while there are more stages and STAGE_MAX hasn't
          * been reached, continue setting the full_stage field
          * to the next string returned by strtok and callocing 
@@ -55,42 +67,57 @@ int main(){
             else{
                 fprintf(stderr, "pipeline too deep\n");
                 print_fail();
-                exit(1);
+                exit(-2);
             }
         }
     }
-    
-    //make stage structs
+   
+
+    /*This sections creates the rest of the stage struct*/ 
+
+    /*Begin by iterating through the number of stages*/
     for(i = 0; i < num_of_stages; i++){
-        //set default input and output for stage
-        if(i == 0){//first stage
+        /*Set the default input and output for stage*/
+        /*Stage 0's default is stdin, stdout, or pipeline*/
+        if(i == 0){
             stages[i]->input = "original stdin";
-            if(i == num_of_stages - 1)//last stage
+            /*If it is the last stage, deault out of stdout*/
+            if(i == num_of_stages - 1){
                 stages[i]->output = "original stdout";
+            }
+            /*If not the last stage, default out of pipe*/
             else{
                 sprintf(outs[i], "pipe to stage %d", i + 1); 
                 stages[i]->output = outs[i];
             }
         }
-        else{//not first stage
+        /*Every other stage's deafult is pipe, stdout*/
+        else{
             sprintf(ins[i], "pipe from stage %d", i - 1);
             stages[i]->input = ins[i];
-            if(i == num_of_stages - 1)//last stage
+            /*If it's the last stage, stdout for output*/
+            if(i == num_of_stages - 1){
                 stages[i]->output = "original stdout";
+            }
+            /*IF not last stage, defult out of pipe.*/
             else{
                 sprintf(outs[i], "pipe to stage %d", i + 1); 
                 stages[i]->output = outs[i];
             }
         }
 
-        /*store full stages elsewhere so that they will be untouched by 
-         * the strtok(3) calls in init_stage*/
-        full_stages[i] = calloc(strlen(stages[i]->full_stage), sizeof(char));
-        strcpy(full_stages[i], stages[i]->full_stage);
+        /*Store full_stage elsewhere so that the char * will be untouched by 
+         *the strtok(3) calls in init_stage*/
+        full_stages[i] = calloc(strlen(stages[i]->full_stage) + 1, sizeof(char));
+        strncpy(full_stages[i], stages[i]->full_stage, 
+            strlen(stages[i]->full_stage));
 
+        /* 
+         **/
+        printf("i: %d, num_of_stages: %d\n", i , num_of_stages);
         init_stage(stages[i], i, num_of_stages - 1);
 
-        //reset full_stage field
+        /*Reset full_stage field with the previously saved value*/
         stages[i]->full_stage = full_stages[i];
     }
 
