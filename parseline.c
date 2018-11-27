@@ -64,7 +64,9 @@ int main(){
             if(num_of_stages < STAGE_MAX)
                 stages[num_of_stages] = calloc(1, sizeof(stage));
             else{
-                print_long_pipe(stages, full_stages);
+                if(strtok(NULL, "|") != NULL)
+                    print_long_pipe(stages, full_stages);
+                break;
             }
         }
     }
@@ -123,7 +125,8 @@ int main(){
         free(stages[i]);
     }
     //free space calloced for a new stage but not filled
-    free(stages[i]);
+    if(num_of_stages < STAGE_MAX)
+        free(stages[i]);
 
     return 0;
 }
