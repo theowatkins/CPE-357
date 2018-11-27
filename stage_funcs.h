@@ -6,7 +6,7 @@
 #include <string.h>
 #include "parseline.h"
 
-#define ARG_MAX 4
+#define ARG_MAX 64
 //max length of default input message plus null
 #define IN_LEN 19
 //max length of default output message plus null

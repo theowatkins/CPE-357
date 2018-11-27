@@ -10,6 +10,6 @@
  * the line needs to be null terminated so strtok(3)
  * can be used on it*/
 #define LINE_MAX 4096
-#define STAGE_MAX 4
+#define STAGE_MAX 64
 
 #endif
