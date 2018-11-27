@@ -61,7 +61,7 @@ int main(){
         while((stages[num_of_stages]->full_stage = 
                     strtok(NULL, "|")) != NULL){
             num_of_stages++;
-            if(num_of_stages <= STAGE_MAX)
+            if(num_of_stages < STAGE_MAX)
                 stages[num_of_stages] = calloc(1, sizeof(stage));
             else{
                 print_long_pipe(stages, full_stages);

@@ -109,7 +109,7 @@ void init_stage(stage *st, int s_num, int num_stages,
             else{
                 st->argv[st->argc] = arg;
                 st->argc++;
-                if(st->argc == ARG_MAX){
+                if(st->argc > ARG_MAX + 1){
                     print_many_args(st->argv[0], stages, full_stages);
                 }
             }

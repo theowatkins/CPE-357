@@ -6,7 +6,7 @@
 #include <string.h>
 #include "parseline.h"
 
-#define ARG_MAX 64
+#define ARG_MAX 4
 //max length of default input message plus null
 #define IN_LEN 19
 //max length of default output message plus null
@@ -16,7 +16,7 @@ typedef struct stage{
     int stage_num;
     int argc;
     char *full_stage;
-    char *argv[ARG_MAX];
+    char *argv[ARG_MAX + 1];
     char *input;
     char *output;
 }stage;
