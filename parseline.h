@@ -11,8 +11,6 @@
  * the line needs to be null terminated so strtok(3)
  * can be used on it*/
 #define LINE_MAX 4096
-
-int get_stages(stage *stages[STAGE_MAX], FILE *readfile);
-
+#define STAGE_MAX 64
 
 #endif
