@@ -4,21 +4,23 @@
 #include "stage_funcs.h"
 #include "errors.h"
 
-int main(){
+/*This is the previous main for parseline. 
+ *The stages is modified.
+ *Each stage needs to be freed.*/
+int get_stages(stage *stages[STAGE_MAX], FILE *readfile){
     int c = 0;
     int i = 0;
     int line_count = 0;
     int num_of_stages = 0;
     char line[LINE_MAX] = {0};
-    stage *stages[STAGE_MAX] = {NULL}; /* Does this need to be {NULL}?*/
     char ins[STAGE_MAX][IN_LEN] = {{0}};
     char outs[STAGE_MAX][OUT_LEN] = {{0}};
     char *full_stages[STAGE_MAX] = {NULL};
 
-    printf("line: ");
+    printf("8-P ");
     
     /*Get each character from stdin if it's not EOF or newline*/
-    while((c = getchar()) != EOF && c != '\n'){
+    while((c = fgetc(readfile)) != EOF && c != '\n'){
         /* Leaves space for line to be null terminated so 
          * that strtok(3) can properly execute on it*/
         if(line_count < LINE_MAX - 1){
@@ -29,6 +31,7 @@ int main(){
         /*If the next char results in buffer of length LINE_MAX*/
         else{
             print_long_command(stages, full_stages); 
+            return -1;
         }
     }
 
@@ -38,6 +41,7 @@ int main(){
      * characters after*/
     if(line[line_count - 1] == '|'){
         print_null_cmd(stages, full_stages);
+        return -4;
     }
 
 
@@ -64,7 +68,11 @@ int main(){
             if(num_of_stages < STAGE_MAX)
                 stages[num_of_stages] = calloc(1, sizeof(stage));
             else{
-                print_long_pipe(stages, full_stages);
+                if(strtok(NULL, "|") != NULL){
+                    print_long_pipe(stages, full_stages);
+                    return -2;
+                }
+                break;
             }
         }
     }
@@ -110,20 +118,27 @@ int main(){
         strncpy(full_stages[i], stages[i]->full_stage, 
             strlen(stages[i]->full_stage));
 
-        init_stage(stages[i], i, num_of_stages - 1, stages, full_stages);
+        /*Initializing the inputtted line into each stage, if 
+         *status is return less than 0, an error occured*/
+        int status = init_stage(stages[i], i, num_of_stages - 1, 
+            stages, full_stages);
+        if(status < 0){
+            return status;
+        }
 
         /*Reset full_stage field with the previously saved value*/
         stages[i]->full_stage = full_stages[i];
     }
 
-    //print structs and free them
+    //Free the full_stages since they aren't used in argv,input,or output*/
     for(i = 0; i < num_of_stages; i++){
-        print_stage(stages[i]);
         free(full_stages[i]);
-        free(stages[i]);
     }
-    //free space calloced for a new stage but not filled
-    free(stages[i]);
 
-    return 0;
+    /*Free space calloced for a new stage but not filled, so empty stage*/
+    if(num_of_stages < STAGE_MAX){
+        free(stages[num_of_stages]);
+    }
+
+    return num_of_stages;
 }

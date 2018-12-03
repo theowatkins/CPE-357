@@ -23,7 +23,6 @@ static void print_fail(stage *stages[STAGE_MAX], char *full_stages[STAGE_MAX]){
 void print_long_command(stage *stages[STAGE_MAX], char *full_stages[STAGE_MAX]){
     fprintf(stderr, "command too long\n");
     print_fail(stages, full_stages);
-    exit(-1);
 }
 
 
@@ -32,7 +31,6 @@ void print_long_command(stage *stages[STAGE_MAX], char *full_stages[STAGE_MAX]){
 void print_long_pipe(stage *stages[STAGE_MAX], char *full_stages[STAGE_MAX]){
     fprintf(stderr, "pipeline too deep\n");
     print_fail(stages, full_stages);
-    exit(-2);
 }
 
 
@@ -42,7 +40,6 @@ void print_many_args(char *cmd, stage *stages[STAGE_MAX],
         char *full_stages[STAGE_MAX]){
     fprintf(stderr, "%s: too many arguments\n", cmd);
     print_fail(stages, full_stages);
-    exit(-3);
 }
 
 /*Prints the invalid null command error message.
@@ -50,7 +47,6 @@ void print_many_args(char *cmd, stage *stages[STAGE_MAX],
 void print_null_cmd(stage *stages[STAGE_MAX], char *full_stages[STAGE_MAX]){
     fprintf(stderr, "invalid null command\n");
     print_fail(stages, full_stages);
-    exit(-4);
 }
 
 
@@ -61,7 +57,6 @@ void print_bad_in(char *cmd, stage *stages[STAGE_MAX],
         char *full_stages[STAGE_MAX]){
     fprintf(stderr, "%s: bad input redirection\n", cmd);
     print_fail(stages, full_stages);
-    exit(-5);
 }
 
 
@@ -72,7 +67,6 @@ void print_bad_out(char *cmd, stage *stages[STAGE_MAX],
         char *full_stages[STAGE_MAX]){
     fprintf(stderr, "%s: bad output redirection\n", cmd);
     print_fail(stages, full_stages);
-    exit(-6);
 }
 
 /*Prints the ambigious iput error message.
@@ -82,7 +76,6 @@ void print_ambgs_in(char *cmd, stage *stages[STAGE_MAX],
          char *full_stages[STAGE_MAX]){
     fprintf(stderr, "%s: ambiguous input\n", cmd);
     print_fail(stages, full_stages);
-    exit(-7);
 }
 
 
@@ -93,5 +86,4 @@ void print_ambgs_out(char *cmd, stage *stages[STAGE_MAX],
          char *full_stages[STAGE_MAX]){
     fprintf(stderr, "%s: ambiguous output\n", cmd);
     print_fail(stages, full_stages);
-    exit(-8);
 }
