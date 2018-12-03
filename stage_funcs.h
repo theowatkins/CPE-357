@@ -11,7 +11,7 @@
 //max length of default output message plus null
 #define OUT_LEN 17
 
-#define STAGE_MAX 64
+#define STAGE_MAX 4
 typedef struct stage{
     int stage_num;
     int argc;

@@ -70,6 +70,7 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile){
             else{
                 if(strtok(NULL, "|") != NULL){
                     print_long_pipe(stages, full_stages);
+                    return -2;
                 }
                 break;
             }
@@ -129,11 +130,9 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile){
         stages[i]->full_stage = full_stages[i];
     }
 
-    /*print structs and free them*/
+    /*Free the full_stages since they aren't used in argv,input,or output*/
     for(i = 0; i < num_of_stages; i++){
-        print_stage(stages[i]);
         free(full_stages[i]);
-        free(stages[i]);
     }
 
     /*Free space calloced for a new stage but not filled, so empty stage*/
