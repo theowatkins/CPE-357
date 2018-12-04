@@ -12,10 +12,11 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile){
     int i = 0;
     int line_count = 0;
     int num_of_stages = 0;
+    char *full_stages[STAGE_MAX] = {NULL};
     char line[LINE_MAX] = {0};
     char ins[STAGE_MAX][IN_LEN] = {{0}};
     char outs[STAGE_MAX][OUT_LEN] = {{0}};
-    char *full_stages[STAGE_MAX] = {NULL};
+
 
     printf("8-P ");
     

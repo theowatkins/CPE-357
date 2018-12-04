@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define ARG_MAX 64
 //max length of default input message plus null
@@ -11,7 +12,7 @@
 //max length of default output message plus null
 #define OUT_LEN 17
 
-#define STAGE_MAX 4
+#define STAGE_MAX 64
 typedef struct stage{
     int stage_num;
     int argc;

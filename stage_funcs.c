@@ -18,7 +18,7 @@ void print_stage(stage *st){
 
     printf("\n");
     printf("--------\n");
-    printf("Stage %d: \"%s\"\n", st->stage_num, st->full_stage);
+//    printf("Stage %d: \"%s\"\n", st->stage_num, st->full_stage);
     printf("--------\n");
     printf("%10s: %s\n", in, st->input);
     printf("%10s: %s\n", out, st->output);

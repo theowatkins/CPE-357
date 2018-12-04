@@ -5,7 +5,7 @@ DEBUG= -g
 
 all: mush
 
-mush: mush.o parseline.o stage_funcs.o errors.o
+mush: mush.o parseline.o stage_funcs.o errors.o proc_ctrl.o
 	$(CC) $(DEBUG) $(LDFLAGS) -o $@ $^
 
 %.o: %.c

@@ -13,5 +13,5 @@
 #define LINE_MAX 4096
 #define CONTROL_D -100
 int get_stages(stage *stages[STAGE_MAX], FILE *readfile);
-
+ 
 #endif
