@@ -56,7 +56,7 @@ int init_stage(stage *st, int s_num, int num_stages,
         /*If no argument to start stage, null error command*/
         if(strcmp(cmd, "<") == 0 || strcmp(cmd, ">") == 0){
             print_null_cmd(stages, full_stages);
-            return -4;
+            return -1;
         }
 
         /*Set the argc as 0 initially, then save first argv as cmd.*/
@@ -71,13 +71,13 @@ int init_stage(stage *st, int s_num, int num_stages,
                 /*If more than one input redirects*/
                 if(input_rd_count != 0){
                     print_bad_in(cmd, stages, full_stages);
-                    return -5;
+                    return -1;
                 }
                 input_rd_count++;
                 /*If the stage isn't the first and is part of pipeline*/
                 if(s_num != 0){
                     print_ambgs_in(cmd, stages, full_stages);
-                    return -7;
+                    return -1;
                 }
                 else{
                     if((in = strtok(NULL, " ")) != NULL){
@@ -86,7 +86,7 @@ int init_stage(stage *st, int s_num, int num_stages,
                     /*No filename after < so error*/
                     else{
                         print_bad_in(cmd, stages, full_stages);
-                        return -5;
+                        return -1;
                     }
                 }
             }
@@ -95,13 +95,13 @@ int init_stage(stage *st, int s_num, int num_stages,
                 /*If more than one output redirect*/
                 if(output_rd_count != 0){
                     print_bad_out(cmd, stages, full_stages);
-                    return -6;
+                    return -1;
                 }
                 output_rd_count++;
                 /*If it isn't the last stage and is part of pipeline*/
                 if(s_num != num_stages){
                     print_ambgs_out(cmd, stages, full_stages);
-                    return -8;
+                    return -1;
                 }
                 else{
                     if((out = strtok(NULL, " ")) != NULL){
@@ -110,7 +110,7 @@ int init_stage(stage *st, int s_num, int num_stages,
                     /*No filename after > so error*/
                     else{
                         print_bad_out(cmd, stages, full_stages);
-                        return -6;
+                        return -1;
                     }
                 }
             }
@@ -120,7 +120,7 @@ int init_stage(stage *st, int s_num, int num_stages,
                 st->argc++;
                 if(st->argc > ARG_MAX + 1){
                     print_many_args(st->argv[0], stages, full_stages);
-                    return -3;
+                    return -1;
                 }
             }
         }
@@ -128,7 +128,7 @@ int init_stage(stage *st, int s_num, int num_stages,
     /*If returns NULL, there is no command and it's a null error*/
     else{
         print_null_cmd(stages, full_stages);
-        return -4;
+        return -1;
     }
     return 0;
 }

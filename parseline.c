@@ -34,14 +34,18 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile){
             return -1;
         }
     }
-
+    
+    if(strlen(line) == 0){
+        printf("\n");
+        return CONTROL_D;
+    }
 
     /* If last char is a pipe and handles as invlaid null command error 
      * because strtok(3) will ignore the pipe if there are no
      * characters after*/
     if(line[line_count - 1] == '|'){
         print_null_cmd(stages, full_stages);
-        return -4;
+        return -1;
     }
 
 
@@ -70,7 +74,7 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile){
             else{
                 if(strtok(NULL, "|") != NULL){
                     print_long_pipe(stages, full_stages);
-                    return -2;
+                    return -1;
                 }
                 break;
             }

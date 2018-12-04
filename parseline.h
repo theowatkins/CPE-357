@@ -11,7 +11,7 @@
  * the line needs to be null terminated so strtok(3)
  * can be used on it*/
 #define LINE_MAX 4096
-
+#define CONTROL_D -100
 int get_stages(stage *stages[STAGE_MAX], FILE *readfile);
 
 #endif
