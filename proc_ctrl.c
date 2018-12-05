@@ -2,6 +2,7 @@
 
 #include <sys/wait.h>
 #include "stage_funcs.h"
+#include "errors.h"
 
 /*This function takes in the num_of_stages and the empty 
  *data structure of an array for two int arrays. This gets modified*/
@@ -19,7 +20,7 @@ int get_pipes(int num_of_stages, int pipe_fds[STAGE_MAX - 1][2]){
 /*This is the function that handles forking all the children. 
  *All arguments are borrowed and not modified.*/
 int fork_children(stage *stages[STAGE_MAX], int num_of_stages, 
-    pid_t children[STAGE_MAX], int pipe_fds[STAGE_MAX - 1][2]){
+        pid_t children[STAGE_MAX], int pipe_fds[STAGE_MAX - 1][2]){
     int infd = 0;
     int outfd = 1;
 
@@ -27,8 +28,10 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
         /*If the fork failes, perror and close parent fds*/
         if((children[i] = fork()) < 0){
             perror("Error with forking child");
-            /*Need to close the parent fds of pipes*/
-            /*error_close_fds(i, num_of_stages, pipe_fds);*/
+            for(int h = 0; h < num_of_stages - 1; h++){
+                close(pipe_fds[h][0]);
+                close(pipe_fds[h][1]);
+            }
             return -1;
         }
         /*If pid is 0, it's the child.*/
@@ -41,7 +44,8 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
                     infd = open(stages[0]->input, O_RDONLY); 
                     if(dup2(infd, 0) < 0){
                         perror("Error with dup2 in input");
-                        return -1;
+                        free_child_stages(num_of_stages, stages);
+                        exit(-1);
                     }
                     close(infd);
                 }
@@ -51,7 +55,8 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
             else{
                 if(dup2(pipe_fds[i - 1][0],0) < 0){
                     perror("Error with dup2 in input");
-                    return -1;
+                    free_child_stages(num_of_stages, stages);
+                    exit(-1);
                 }
             }
 
@@ -65,7 +70,8 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
                             S_IRWXU|S_IRGRP|S_IWOTH);
                     if(dup2(outfd, 1) < 0){
                         perror("Error with dup2 in output");
-                        return -1;
+                        free_child_stages(num_of_stages, stages);
+                        exit(-1);
                     }
                     close(outfd);
                 }
@@ -75,7 +81,8 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
             else{ 
                 if(dup2(pipe_fds[i][1], 1) < 0){
                     perror("Error with dup2 in output");
-                    return -1;
+                    free_child_stages(num_of_stages, stages);
+                    exit(-1);
                 }
             }
 
@@ -88,6 +95,7 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
             /*All the set-up was accomplished, so exec*/
             if(execvp(stages[i]->argv[0], stages[i]->argv) < 0){
                 perror(stages[i]->argv[0]);
+                free_child_stages(num_of_stages, stages);
                 exit(-1);
             }
         }
@@ -130,7 +138,6 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
                         close(pipe_fds[k][1]);
                     }
                 }
-                return -1; 
             }
         }
     }
