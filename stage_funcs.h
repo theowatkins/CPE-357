@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #define ARG_MAX 64
 //max length of default input message plus null
@@ -28,5 +29,6 @@ typedef struct stage{
 void print_stage(stage *st);
 int init_stage(stage *st, int s_num, int num_stages,
     stage *stages[STAGE_MAX], char *full_stages[STAGE_MAX]);
+void exec_cd(stage *st);
 
 #endif

@@ -44,7 +44,7 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
                     infd = open(stages[0]->input, O_RDONLY); 
                     if(dup2(infd, 0) < 0){
                         perror("Error with dup2 in input");
-                        free_child_stages(num_of_stages, stages);
+                        free_stages(num_of_stages, stages);
                         exit(-1);
                     }
                     close(infd);
@@ -55,7 +55,7 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
             else{
                 if(dup2(pipe_fds[i - 1][0],0) < 0){
                     perror("Error with dup2 in input");
-                    free_child_stages(num_of_stages, stages);
+                    free_stages(num_of_stages, stages);
                     exit(-1);
                 }
             }
@@ -70,7 +70,7 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
                             S_IRWXU|S_IRGRP|S_IWOTH);
                     if(dup2(outfd, 1) < 0){
                         perror("Error with dup2 in output");
-                        free_child_stages(num_of_stages, stages);
+                        free_stages(num_of_stages, stages);
                         exit(-1);
                     }
                     close(outfd);
@@ -81,7 +81,7 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
             else{ 
                 if(dup2(pipe_fds[i][1], 1) < 0){
                     perror("Error with dup2 in output");
-                    free_child_stages(num_of_stages, stages);
+                    free_stages(num_of_stages, stages);
                     exit(-1);
                 }
             }
@@ -95,7 +95,7 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
             /*All the set-up was accomplished, so exec*/
             if(execvp(stages[i]->argv[0], stages[i]->argv) < 0){
                 perror(stages[i]->argv[0]);
-                free_child_stages(num_of_stages, stages);
+                free_stages(num_of_stages, stages);
                 exit(-1);
             }
         }

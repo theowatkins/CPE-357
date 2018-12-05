@@ -4,6 +4,7 @@
 #include "parseline.h"
 #include "stage_funcs.h"
 #include "mush.h"
+#include "errors.h"
 
 
 int main(int argc, char **argv){    
@@ -62,6 +63,18 @@ int main(int argc, char **argv){
                 break;
             }
         }
+        
+        /*if stages[0] is a cd command, attempt to execute it*/
+        if(strcmp(stages[0]->argv[0], "cd") == 0){
+            if(num_of_stages > 1){
+                fprintf(stderr, "cd must be only argument in pipeline\n");
+                free_stages(num_of_stages, stages);
+                continue;
+            }
+            exec_cd(stages[0]);
+            free_stages(num_of_stages, stages);
+            continue;
+        }
 
         /*Fork off every child and save pid in array.*/
         if(fork_children(stages, num_of_stages, children, pipe_fds) < 0){
@@ -70,12 +83,7 @@ int main(int argc, char **argv){
  
        
         /*Need to free every stage*/
-        for(int i = 0; i < num_of_stages; i++){
-            for(int j = 0; stages[i]->argv[j] != NULL; j++){
-                free(stages[i]->argv[j]);
-            }            
-            free(stages[i]);
-        }
+        free_stages(num_of_stages, stages);
     }
 
     return 0;

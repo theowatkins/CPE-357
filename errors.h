@@ -20,7 +20,7 @@ void print_ambgs_in(char *cmd, stage *stages[STAGE_MAX],
     char *full_stages[STAGE_MAX]);
 void print_ambgs_out(char *cmd, stage *stages[STAGE_MAX], 
     char *full_stages[STAGE_MAX]);
-void free_child_stages(int num_of_stages, 
+void free_stages(int num_of_stages, 
         stage *stages[STAGE_MAX]);
 #endif
 

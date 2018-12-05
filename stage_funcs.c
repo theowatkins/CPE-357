@@ -143,3 +143,21 @@ int init_stage(stage *st, int s_num, int num_stages,
     }
     return 0;
 }
+
+
+void exec_cd(stage *st){
+    //make sure there is only one arg to cd
+    if(st->argc == 1){
+        fprintf(stderr, "cd: missing argument\n");
+        return;
+    }
+    else if(st->argc > 2){
+        fprintf(stderr, "cd: too many arguments\n");
+        return;
+    }
+    
+    if(chdir(st->argv[1]) != 0){
+        fprintf(stderr, "%s: %s\n", st->argv[1], strerror(errno));
+        return;
+    }
+}
