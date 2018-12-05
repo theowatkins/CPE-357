@@ -7,16 +7,15 @@
 /*This is the previous main for parseline. 
  *The stages is modified.
  *Each stage needs to be freed.*/
-int get_stages(stage *stages[STAGE_MAX], FILE *readfile){
+int get_stages(stage *stages[STAGE_MAX], FILE *readfile,
+     char ins[STAGE_MAX][IN_LEN], char outs[STAGE_MAX][OUT_LEN]){
+
     int c = 0;
     int i = 0;
     int line_count = 0;
     int num_of_stages = 0;
     char *full_stages[STAGE_MAX] = {NULL};
     char line[LINE_MAX] = {0};
-    char ins[STAGE_MAX][IN_LEN] = {{0}};
-    char outs[STAGE_MAX][OUT_LEN] = {{0}};
-
 
     printf("8-P ");
     

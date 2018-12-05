@@ -12,6 +12,9 @@
  * can be used on it*/
 #define LINE_MAX 4096
 #define CONTROL_D -100
-int get_stages(stage *stages[STAGE_MAX], FILE *readfile);
- 
+int get_stages(stage *stages[STAGE_MAX], FILE *readfile,
+     char ins[STAGE_MAX][IN_LEN],
+    char outs[STAGE_MAX][OUT_LEN]);
+
+
 #endif

@@ -10,6 +10,9 @@ static void print_fail(stage *stages[STAGE_MAX], char *full_stages[STAGE_MAX]);
 static void print_fail(stage *stages[STAGE_MAX], char *full_stages[STAGE_MAX]){
     fprintf(stderr, "failed to parse pipeline\n");
     for(int i = 0; i < STAGE_MAX && stages[i] != NULL; i++){
+        for(int j = 0; stages[i]->argv[j] != NULL; j++){
+            free(stages[i]->argv[j]);
+        }
         free(stages[i]);
     }
     for(int i = 0; i < STAGE_MAX && full_stages[i] != NULL; i++){

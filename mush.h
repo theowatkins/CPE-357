@@ -3,6 +3,11 @@
 #ifndef MUSH
 #define MUSH
 
+
+#include "stage_funcs.h"
+
 int get_pipes(int num_of_stages, int pipe_fds[STAGE_MAX - 1][2]);
+int fork_children(stage *stages[STAGE_MAX], int num_of_stages, 
+    pid_t children[STAGE_MAX], int pipe_fds[STAGE_MAX - 1][2]);
 
 #endif

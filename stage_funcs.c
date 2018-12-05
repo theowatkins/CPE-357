@@ -51,7 +51,12 @@ int init_stage(stage *st, int s_num, int num_stages,
     /*Parse the full_stage for the first word*/ 
     if((arg = strtok(st->full_stage, " ")) != NULL){
         /*Save the first word as the command*/
-        cmd = arg;
+        cmd = calloc(strlen(arg) + 1, sizeof(char));
+        if(cmd == NULL){
+            perror("error callocing cmd");
+            exit(-1);
+        }
+        strcpy(cmd, arg);
         
         /*If no argument to start stage, null error command*/
         if(strcmp(cmd, "<") == 0 || strcmp(cmd, ">") == 0){
@@ -116,7 +121,13 @@ int init_stage(stage *st, int s_num, int num_stages,
             }
             /*If it is a regular arg*/
             else{
-                st->argv[st->argc] = arg;
+                char *calloc_arg = calloc(strlen(arg) + 1, sizeof(char));
+                if(calloc_arg == NULL){
+                    perror("error callocing arg");
+                    exit(-1);
+                }
+                strcpy(calloc_arg, arg);
+                st->argv[st->argc] = calloc_arg;
                 st->argc++;
                 if(st->argc > ARG_MAX + 1){
                     print_many_args(st->argv[0], stages, full_stages);
