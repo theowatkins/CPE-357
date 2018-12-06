@@ -43,24 +43,13 @@ int main(int argc, char **argv){
             if((num_of_stages = get_stages(stages, stdin, ins, outs)) == CONTROL_D){
                 printf("\n");
                 break;
-            }
-            /*This deals with parseline errors -- NEED TO CHANGE DUE TO FREEING*/
-            else if(num_of_stages < 0){
-                fprintf(stderr, "error occured %d\n", num_of_stages);
-                exit(-1);
-            }
-           
+            } 
         }
         /*If there is one other argument, run shell using infile.*/
         else if(argc == 2){
             input = fopen(argv[1], "r");
             if((num_of_stages = get_stages(stages, input, ins, outs)) == CONTROL_D){
                 break;
-            }
-            /*This deals with the parseline errors. -- NEED TO CHANGE DUE TO FREEING*/
-            else if(num_of_stages < 0){
-                fprintf(stderr, "error occured %d\n", num_of_stages);
-                exit(-1);
             }
             if(fclose(input) != 0){
                 perror("closing readfile");
