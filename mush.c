@@ -31,8 +31,10 @@ int main(int argc, char **argv){
             if((num_of_stages = get_stages(stages, stdin, ins, outs)) == CONTROL_D){
                 break;
             }
+            /*This deals with parseline errors -- NEED TO CHANGE DUE TO FREEING*/
             else if(num_of_stages < 0){
                 fprintf(stderr, "error occured %d\n", num_of_stages);
+                exit(-1);
             }
            
         }
@@ -42,8 +44,10 @@ int main(int argc, char **argv){
             if((num_of_stages = get_stages(stages, input, ins, outs)) == CONTROL_D){
                 break;
             }
+            /*This deals with the parseline errors. -- NEED TO CHANGE DUE TO FREEING*/
             else if(num_of_stages < 0){
                 fprintf(stderr, "error occured %d\n", num_of_stages);
+                exit(-1);
             }
         }
         /*If there is more than one argument, usage error.*/

@@ -86,7 +86,13 @@ int init_stage(stage *st, int s_num, int num_stages,
                 }
                 else{
                     if((in = strtok(NULL, " ")) != NULL){
-                        st->input = in;
+                        char *new_in = calloc(strlen(in) + 1, sizeof(char));
+                        if(new_in == NULL){
+                            perror("error callocing new_in");
+                            exit(-1);
+                        }
+                        strcpy(new_in, in);
+                        st->input = new_in;
                     }
                     /*No filename after < so error*/
                     else{
@@ -110,7 +116,13 @@ int init_stage(stage *st, int s_num, int num_stages,
                 }
                 else{
                     if((out = strtok(NULL, " ")) != NULL){
-                        st->output = out;
+                        char *new_out = calloc(strlen(out) + 1, sizeof(char));
+                        if(new_out == NULL){
+                            perror("error callocing new_out");
+                            exit(-1);
+                        }
+                        strcpy(new_out, out);
+                        st->output = new_out;
                     }
                     /*No filename after > so error*/
                     else{

@@ -93,11 +93,20 @@ void print_ambgs_out(char *cmd, stage *stages[STAGE_MAX],
 
 
 /*frees the stages array in the child when it errors*/
-void free_stages(int num_of_stages, 
-        stage *stages[STAGE_MAX]){ 
+void free_stages(int num_of_stages, stage *stages[STAGE_MAX]){ 
     for(int i = 0; i < num_of_stages; i++){
         for(int j = 0; stages[i]->argv[j] != NULL; j++){
             free(stages[i]->argv[j]);
+        }
+        if(i == 0){
+            if(strcmp(stages[i]->input, "original stdin") != 0){
+                free(stages[i]->input);
+            }
+        }
+        if(i == num_of_stages - 1){
+            if(strcmp(stages[i]->output, "original stdout") != 0){
+                free(stages[i]->output);
+            }
         }            
         free(stages[i]);
     }

@@ -34,6 +34,11 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile,
             return -1;
         }
     }
+
+    if(fclose(readfile) != 0){
+        perror("closing readfile");
+        exit(-1);
+    }
     
     if(strlen(line) == 0){
         printf("\n");
