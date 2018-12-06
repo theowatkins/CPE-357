@@ -34,16 +34,8 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile,
             return -1;
         }
     }
-
-    if(fclose(readfile) != 0){
-        perror("closing readfile");
-        exit(-1);
-    }
-    
-    if(strlen(line) == 0){
-        printf("\n");
+    if(c == EOF)
         return CONTROL_D;
-    }
 
     /* If last char is a pipe and handles as invlaid null command error 
      * because strtok(3) will ignore the pipe if there are no

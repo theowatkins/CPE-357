@@ -1,20 +1,29 @@
 /*This is the main file for the mush shell.*/
 
-#include <sys/types.h>
+#define _XOPEN_SOURCE
+#define _BSD_SOURCE
+
 #include "parseline.h"
 #include "stage_funcs.h"
 #include "mush.h"
 #include "errors.h"
 
 
+pid_t pid = 0;
+
+void handler(int sig){
+    killpg(pid, SIGINT);
+}
+
 int main(int argc, char **argv){    
+    pid = getpid();
     stage *stages[STAGE_MAX] = {NULL};
     int num_of_stages = 0;   
     int pipe_fds[STAGE_MAX - 1][2];
     pid_t children[STAGE_MAX] = {0};
     char ins[STAGE_MAX][IN_LEN] = {{0}};
     char outs[STAGE_MAX][OUT_LEN] = {{0}};
-
+    struct sigaction sig_ac;
 
 
     /*Need to be in a large while loop until control D or exit().*/
@@ -29,6 +38,7 @@ int main(int argc, char **argv){
         if(argc == 1){
             /*NEED TO FREE EVERYTHING HERE, or break?*/
             if((num_of_stages = get_stages(stages, stdin, ins, outs)) == CONTROL_D){
+                printf("\n");
                 break;
             }
             /*This deals with parseline errors -- NEED TO CHANGE DUE TO FREEING*/
@@ -49,6 +59,11 @@ int main(int argc, char **argv){
                 fprintf(stderr, "error occured %d\n", num_of_stages);
                 exit(-1);
             }
+            if(fclose(input) != 0){
+                perror("closing readfile");
+                exit(-1);
+            }
+
         }
         /*If there is more than one argument, usage error.*/
         else{
@@ -56,8 +71,14 @@ int main(int argc, char **argv){
             exit(-1);
         }
 
-
-        /*Need to set signal mask.*/
+        /*set up sigaction struct*/
+        memset(&sig_ac, 0, sizeof(sig_ac));//clears sigaction memory
+        sig_ac.sa_handler = &handler;//give sigaction a handler func
+        sigemptyset(&sig_ac.sa_mask);
+        if(sigaction(SIGALRM, &sig_ac, NULL) < 0){
+            perror("sigaction error");
+            exit(-1);
+        }
 
 
         /*Need to create all the pipes and save the file descriptors.*/
@@ -67,6 +88,8 @@ int main(int argc, char **argv){
                 break;
             }
         }
+        else
+            continue;
         
         /*if stages[0] is a cd command, attempt to execute it*/
         if(strcmp(stages[0]->argv[0], "cd") == 0){
@@ -81,7 +104,7 @@ int main(int argc, char **argv){
         }
 
         /*Fork off every child and save pid in array.*/
-        if(fork_children(stages, num_of_stages, children, pipe_fds) < 0){
+        if(fork_children(stages, num_of_stages, (gid_t)pid, children, pipe_fds) < 0){
             perror("fork_children failed");
         }       
  

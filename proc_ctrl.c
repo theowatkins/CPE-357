@@ -19,7 +19,7 @@ int get_pipes(int num_of_stages, int pipe_fds[STAGE_MAX - 1][2]){
 
 /*This is the function that handles forking all the children. 
  *All arguments are borrowed and not modified.*/
-int fork_children(stage *stages[STAGE_MAX], int num_of_stages, 
+int fork_children(stage *stages[STAGE_MAX], int num_of_stages, gid_t child_gid,
         pid_t children[STAGE_MAX], int pipe_fds[STAGE_MAX - 1][2]){
     int infd = 0;
     int outfd = 1;
@@ -36,6 +36,13 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages,
         }
         /*If pid is 0, it's the child.*/
         else if(children[i] == 0){
+            /*set gid of all children to same value so
+             * they can be killed by SIGINT*/
+            if(setpgid(getpid(), child_gid) < 0){
+                perror("setgid error");
+                free_stages(num_of_stages, stages);
+                exit(-1);
+            }
             /*First need to deal with the input file*/
             /*If it is the first child, deal with input of og or file*/
             if(i == 0){
