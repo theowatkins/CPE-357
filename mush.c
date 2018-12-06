@@ -1,6 +1,7 @@
 /*This is the main file for the mush shell.*/
 
 #define _XOPEN_SOURCE
+#define _XOPEN_SOURCE_EXTENDED
 #define _BSD_SOURCE
 
 #include "parseline.h"
@@ -8,15 +9,19 @@
 #include "mush.h"
 #include "errors.h"
 
-
-pid_t pid = 0;
+/*stores the pid of the first forked child
+ * to be used as the group id for all the 
+ * children*/
+gid_t gid = 0;
 
 void handler(int sig){
-    killpg(pid, SIGINT);
+    if(gid != 0)
+        //send sigint to children
+        killpg(gid, SIGINT); 
+    printf("\n");
 }
 
 int main(int argc, char **argv){    
-    pid = getpid();
     stage *stages[STAGE_MAX] = {NULL};
     int num_of_stages = 0;   
     int pipe_fds[STAGE_MAX - 1][2];
@@ -25,10 +30,18 @@ int main(int argc, char **argv){
     char outs[STAGE_MAX][OUT_LEN] = {{0}};
     struct sigaction sig_ac;
     FILE *input = NULL;
+    
+
+    /*set up sigaction struct*/
+    memset(&sig_ac, 0, sizeof(sig_ac));//clears sigaction memory
+    sig_ac.sa_handler = &handler;//give sigaction a handler func
+    if(sigaction(SIGINT, &sig_ac, NULL) < 0){
+        perror("sigaction error");
+        exit(-1);
+    }
 
     /*Need to be in a large while loop until control D or exit().*/
     while(num_of_stages != CONTROL_D){
-
         /*This is the section where we deal with running the parseline and
          *and getting the array of stage pointers and number of stages back.
          *If num_of_stages == CONTROL_D, end the shell
@@ -63,15 +76,6 @@ int main(int argc, char **argv){
             exit(-1);
         }
 
-        /*set up sigaction struct*/
-        memset(&sig_ac, 0, sizeof(sig_ac));//clears sigaction memory
-        sig_ac.sa_handler = &handler;//give sigaction a handler func
-        sigemptyset(&sig_ac.sa_mask);
-        if(sigaction(SIGALRM, &sig_ac, NULL) < 0){
-            perror("sigaction error");
-            exit(-1);
-        }
-
 
         /*Need to create all the pipes and save the file descriptors.*/
         if(num_of_stages > 0){
@@ -96,7 +100,7 @@ int main(int argc, char **argv){
         }
 
         /*Fork off every child and save pid in array.*/
-        if(fork_children(stages, num_of_stages, (gid_t)pid, children, pipe_fds) < 0){
+        if(fork_children(stages, num_of_stages, &gid, children, pipe_fds) < 0){
             perror("fork_children failed");
         }       
  

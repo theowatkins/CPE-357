@@ -35,7 +35,7 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile,
             return -1;
         }
     }
-    if(c == EOF)
+    if(feof(readfile))
         return CONTROL_D;
 
     /* If last char is a pipe and handles as invlaid null command error 

@@ -1,5 +1,8 @@
 /*This is the file that handles most process controls of the parent.*/
 
+#define _XOPEN_SOURCE
+#define _XOPEN_SOURCE_EXTENDED
+
 #include <sys/wait.h>
 #include "stage_funcs.h"
 #include "errors.h"
@@ -19,10 +22,14 @@ int get_pipes(int num_of_stages, int pipe_fds[STAGE_MAX - 1][2]){
 
 /*This is the function that handles forking all the children. 
  *All arguments are borrowed and not modified.*/
-int fork_children(stage *stages[STAGE_MAX], int num_of_stages, gid_t child_gid,
+int fork_children(stage *stages[STAGE_MAX], int num_of_stages, gid_t *gid,
         pid_t children[STAGE_MAX], int pipe_fds[STAGE_MAX - 1][2]){
     int infd = 0;
     int outfd = 1;
+    /*create a sigset_t with only SIGINT*/
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGINT);
 
     for(int i = 0; i < num_of_stages; i++){
         /*If the fork failes, perror and close parent fds*/
@@ -36,12 +43,18 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages, gid_t child_gid,
         }
         /*If pid is 0, it's the child.*/
         else if(children[i] == 0){
-            /*set gid of all children to same value so
-             * they can be killed by SIGINT*/
-            if(setpgid(getpid(), child_gid) < 0){
-                perror("setgid error");
-                free_stages(num_of_stages, stages);
+            /*ensure that the child does not block SIGINTs*/
+            if(sigprocmask(SIG_UNBLOCK, &set, NULL) < 0){
+                perror("set mask in child failed");
                 exit(-1);
+            }
+            /*set pgid of all children to gid so
+             * that killpg() can send a SIGINT to 
+             * all the children*/
+            if(setpgid(getpid(), *gid) < 0){
+                 perror("setgid error");
+                 free_stages(num_of_stages, stages);
+                 exit(-1);
             }
             /*First need to deal with the input file*/
             /*If it is the first child, deal with input of og or file*/
@@ -108,7 +121,9 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages, gid_t child_gid,
         }
         /*Now you have to deal with the parent*/
         else{
-            /**/
+            /*set gid to the pid of the first child*/
+            *gid = children[0];
+    
             if(i > 0 && i < num_of_stages){
                 close(pipe_fds[i - 1][0]);
                 close(pipe_fds[i - 1][1]);
@@ -117,17 +132,25 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages, gid_t child_gid,
 
         /*Need to wait for every child*/
         int status = 0;
-        if(waitpid(children[i], &status, 0) != children[i]){
-            perror("error with waitpid");
-            return -1;
+
+        /*if waitpid appears to error but really it was just an
+         * interrupt, wait again.  If not, return error value*/
+        while(waitpid(children[i], &status, 0) != children[i]){
+            if(errno != EINTR){
+                perror("error with waitpid");
+                return -1;
+            }
         }
+        /*reset gid for next pipeline*/
+        *gid = 0;
+
         /*Need to check if CTRL+C was signaled*/
         if(WIFSIGNALED(status)){
             for(int k = i + 1; k < num_of_stages - 1; k++){
                 close(pipe_fds[k][0]);
                 close(pipe_fds[k][1]);
             }
-            return -1;
+            return 0;
         }
         /*Need to check if it exited properly*/
         else if(WIFEXITED(status)){
