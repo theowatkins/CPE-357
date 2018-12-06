@@ -5,10 +5,10 @@
 
 static void print_fail(stage *stages[STAGE_MAX], char *full_stages[STAGE_MAX]);
 
+//TOOK OUT PRINT STATEMENT IN PRINT_FAIL WE MIGHT WANT TO RENAME IT!!!
 /*Prints the failed to parse error message.
  *No arguments or return types, solely prints to stderror*/
 static void print_fail(stage *stages[STAGE_MAX], char *full_stages[STAGE_MAX]){
-    fprintf(stderr, "failed to parse pipeline\n");
     for(int i = 0; i < STAGE_MAX && stages[i] != NULL; i++){
         for(int j = 0; stages[i]->argv[j] != NULL; j++){
             free(stages[i]->argv[j]);
