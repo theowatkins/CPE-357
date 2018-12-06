@@ -24,7 +24,7 @@ int main(int argc, char **argv){
     char ins[STAGE_MAX][IN_LEN] = {{0}};
     char outs[STAGE_MAX][OUT_LEN] = {{0}};
     struct sigaction sig_ac;
-
+    FILE *input = NULL;
 
     /*Need to be in a large while loop until control D or exit().*/
     while(num_of_stages != CONTROL_D){
@@ -33,6 +33,9 @@ int main(int argc, char **argv){
          *and getting the array of stage pointers and number of stages back.
          *If num_of_stages == CONTROL_D, end the shell
          *If any other negative number, there was an error parsing.*/
+        
+        if(input != NULL)//already read input from a file
+            break;
 
         /*If there is no other arguments, run shell through stdio.*/
         if(argc == 1){
@@ -50,7 +53,7 @@ int main(int argc, char **argv){
         }
         /*If there is one other argument, run shell using infile.*/
         else if(argc == 2){
-            FILE *input = fopen(argv[1], "r");
+            input = fopen(argv[1], "r");
             if((num_of_stages = get_stages(stages, input, ins, outs)) == CONTROL_D){
                 break;
             }

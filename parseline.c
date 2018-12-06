@@ -16,8 +16,9 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile,
     int num_of_stages = 0;
     char *full_stages[STAGE_MAX] = {NULL};
     char line[LINE_MAX] = {0};
-
-    printf("8-P ");
+    
+    if(readfile == stdin)
+        printf("8-P ");
     
     /*Get each character from stdin if it's not EOF or newline*/
     while((c = fgetc(readfile)) != EOF && c != '\n'){
