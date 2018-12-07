@@ -42,8 +42,13 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile,
             /*Still need to clear the file*/
             char *lineptr = NULL;
             size_t n;
-            getline(&lineptr, &n, readfile);
-            free(lineptr);
+            if(getline(&lineptr, &n, readfile) < 0){
+                perror("getline error");
+                return -1;
+            }
+            if(lineptr != NULL){
+                free(lineptr);
+            }
 
             return -1;
         }
