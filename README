@@ -2,10 +2,11 @@ Theo Watkins(thwatkin)
 Anna Barone(barone)
 
 Splitting up the work:
- - Theo: Interrupt handling, cd functionality, 
+ - Theo: handled interrupts, implemented cd functionality, wrote most of parseline, helped with process control
 
- - Anna: revamp the parseline, processes control, parseline error handling,
+ - Anna: revamped parseline, wrote most of the process control code, cleaned up parseline errors
 
-LINE_MAX is 4096, but the command line cannot be larger than 4095 so that there remains null terminated.  I set the ARG_MAX(max number of args to a stage) and the STAGE_MAX(max number of stages) to 64.  I chose all of these numbers because they are squares of two which tend to make computers happy and they seemed large enough that it would be unreasonable for a human to type a pipeline that would exceed these limits.
+GLOBAL VARIABLE: We have one global variable (gid) that stores the pid of the first forked child to be used as the group id for all the children.  It has to be global so that our SIGINT handler can pass it to killpg(). It can't be local to the handler because it needs to be set elsewhere.  
 
-We chose to use limits because we tried implementing it with everything dynamically allocated but we kept losing track of how much memory was allocated.  We knew we were going to have trouble freeing everything so we just set the sizes. However, after assignment 5, we decided it was necessary to calloc everything outputted from strtok.
+LINE_MAX is 4096, but the command line cannot be larger than 4095 so that it remains null terminated.  I set the ARG_MAX(max number of args to a stage) and the STAGE_MAX(max number of stages) to 64.  I chose all of these numbers because they are squares of two which tend to make computers happy and they seemed large enough that it would be unreasonable for a human to type a pipeline that would exceed these limits.
+

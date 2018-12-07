@@ -27,7 +27,7 @@ static void free_fail(stage *stages[STAGE_MAX],
  *No arguments or return type, solely prints then exits.*/
 void print_long_command(stage *stages[STAGE_MAX], 
         char *full_stages[STAGE_MAX], int num_of_stages){
-    fprintf(stderr, "command too long\n");
+    fprintf(stderr, "Command too long.\n");
     free_fail(stages, full_stages, num_of_stages);
 }
 
@@ -36,7 +36,7 @@ void print_long_command(stage *stages[STAGE_MAX],
  *No arguments or return types, solely prints then exits*/
 void print_long_pipe(stage *stages[STAGE_MAX], 
         char *full_stages[STAGE_MAX], int num_of_stages){
-    fprintf(stderr, "pipeline too deep\n");
+    fprintf(stderr, "Pipeline too deep.\n");
     free_fail(stages, full_stages, num_of_stages);
 }
 
@@ -45,7 +45,7 @@ void print_long_pipe(stage *stages[STAGE_MAX],
  *No return types, arguments are freed.*/
 void print_many_args(char *cmd, stage *stages[STAGE_MAX], 
         char *full_stages[STAGE_MAX], int num_of_stages){
-    fprintf(stderr, "%s: too many arguments\n", cmd);
+    fprintf(stderr, "%s: Too many arguments.\n", cmd);
     free_fail(stages, full_stages, num_of_stages);
 }
 
