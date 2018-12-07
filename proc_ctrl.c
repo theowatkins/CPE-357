@@ -43,11 +43,13 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages, gid_t *gid,
         }
         /*If pid is 0, it's the child.*/
         else if(children[i] == 0){
+            
             /*ensure that the child does not block SIGINTs*/
             if(sigprocmask(SIG_UNBLOCK, &set, NULL) < 0){
                 perror("set mask in child failed");
                 exit(-1);
             }
+
             /*set pgid of all children to gid so
              * that killpg() can send a SIGINT to 
              * all the children*/
@@ -56,6 +58,7 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages, gid_t *gid,
                  free_stages(num_of_stages, stages);
                  exit(-1);
             }
+
             /*First need to deal with the input file*/
             /*If it is the first child, deal with input of og or file*/
             if(i == 0){
@@ -171,6 +174,7 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages, gid_t *gid,
             }
         }
     }
+
     return 0;
 }
 

@@ -1,4 +1,5 @@
 /*This is the driver C file for parseline*/
+#define _GNU_SOURCE
 
 #include "parseline.h"
 #include "stage_funcs.h"
@@ -6,7 +7,12 @@
 
 /*This is the previous main for parseline. 
  *The stages is modified.
- *Each stage needs to be freed.*/
+ *Each stage needs to be freed.
+
+ *Return value of >0, no error occured,
+ *Return value of CONTROL_D if EOF to end the file
+ *Return -1 if an error ocurred
+*/
 int get_stages(stage *stages[STAGE_MAX], FILE *readfile,
      char ins[STAGE_MAX][IN_LEN], char outs[STAGE_MAX][OUT_LEN]){
 
@@ -31,10 +37,18 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile,
         }
         /*If the next char results in buffer of length LINE_MAX*/
         else{
-            print_long_command(stages, full_stages); 
+            print_long_command(stages, full_stages, num_of_stages);
+
+            /*Still need to clear the file*/
+            char *lineptr = NULL;
+            size_t n;
+            getline(&lineptr, &n, readfile);
+            free(lineptr);
+
             return -1;
         }
     }
+    /*If there is an EOF, return with the shell kill CTRL+D*/
     if(feof(readfile))
         return CONTROL_D;
 
@@ -42,7 +56,7 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile,
      * because strtok(3) will ignore the pipe if there are no
      * characters after*/
     if(line[line_count - 1] == '|'){
-        print_null_cmd(stages, full_stages);
+        print_null_cmd(stages, full_stages, num_of_stages);
         return -1;
     }
 
@@ -71,7 +85,7 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile,
                 stages[num_of_stages] = calloc(1, sizeof(stage));
             else{
                 if(strtok(NULL, "|") != NULL){
-                    print_long_pipe(stages, full_stages);
+                    print_long_pipe(stages, full_stages, num_of_stages);
                     return -1;
                 }
                 break;
@@ -122,9 +136,12 @@ int get_stages(stage *stages[STAGE_MAX], FILE *readfile,
 
         /*Initializing the inputtted line into each stage, if 
          *status is return less than 0, an error occured*/
-        int status = init_stage(stages[i], i, num_of_stages - 1, 
+        int status = init_stage(stages[i], i, num_of_stages,
             stages, full_stages);
         if(status < 0){
+            if(num_of_stages < STAGE_MAX){
+                free(stages[num_of_stages]);
+            }
             return status;
         }
 

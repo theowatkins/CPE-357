@@ -1,6 +1,11 @@
 Theo Watkins(thwatkin)
 Anna Barone(barone)
 
+Splitting up the work:
+ - Theo: Interrupt handling, cd functionality, 
+
+ - Anna: revamp the parseline, processes control, parseline error handling,
+
 LINE_MAX is 4096, but the command line cannot be larger than 4095 so that there remains null terminated.  I set the ARG_MAX(max number of args to a stage) and the STAGE_MAX(max number of stages) to 64.  I chose all of these numbers because they are squares of two which tend to make computers happy and they seemed large enough that it would be unreasonable for a human to type a pipeline that would exceed these limits.
 
-I chose to use limits because I tried implementing it with everything dynamically allocated but I kept losing track of how much memory I was using.  I knew I was going to have trouble freeing everything so I just set the sizes. 
+We chose to use limits because we tried implementing it with everything dynamically allocated but we kept losing track of how much memory was allocated.  We knew we were going to have trouble freeing everything so we just set the sizes. However, after assignment 5, we decided it was necessary to calloc everything outputted from strtok.

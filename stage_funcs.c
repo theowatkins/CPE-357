@@ -60,7 +60,7 @@ int init_stage(stage *st, int s_num, int num_stages,
         
         /*If no argument to start stage, null error command*/
         if(strcmp(cmd, "<") == 0 || strcmp(cmd, ">") == 0){
-            print_null_cmd(stages, full_stages);
+            print_null_cmd(stages, full_stages, num_stages);
             return -1;
         }
 
@@ -75,13 +75,13 @@ int init_stage(stage *st, int s_num, int num_stages,
             if(strcmp(arg, "<") == 0){
                 /*If more than one input redirects*/
                 if(input_rd_count != 0){
-                    print_bad_in(cmd, stages, full_stages);
+                    print_bad_in(cmd, stages, full_stages, num_stages);
                     return -1;
                 }
                 input_rd_count++;
                 /*If the stage isn't the first and is part of pipeline*/
                 if(s_num != 0){
-                    print_ambgs_in(cmd, stages, full_stages);
+                    print_ambgs_in(cmd, stages, full_stages, num_stages);
                     return -1;
                 }
                 else{
@@ -96,7 +96,7 @@ int init_stage(stage *st, int s_num, int num_stages,
                     }
                     /*No filename after < so error*/
                     else{
-                        print_bad_in(cmd, stages, full_stages);
+                        print_bad_in(cmd, stages, full_stages, num_stages);
                         return -1;
                     }
                 }
@@ -105,13 +105,13 @@ int init_stage(stage *st, int s_num, int num_stages,
             else if(strcmp(arg, ">") == 0){
                 /*If more than one output redirect*/
                 if(output_rd_count != 0){
-                    print_bad_out(cmd, stages, full_stages);
+                    print_bad_out(cmd, stages, full_stages, num_stages);
                     return -1;
                 }
                 output_rd_count++;
                 /*If it isn't the last stage and is part of pipeline*/
-                if(s_num != num_stages){
-                    print_ambgs_out(cmd, stages, full_stages);
+                if(s_num != num_stages - 1){
+                    print_ambgs_out(cmd, stages, full_stages, num_stages);
                     return -1;
                 }
                 else{
@@ -126,7 +126,7 @@ int init_stage(stage *st, int s_num, int num_stages,
                     }
                     /*No filename after > so error*/
                     else{
-                        print_bad_out(cmd, stages, full_stages);
+                        print_bad_out(cmd, stages, full_stages, num_stages);
                         return -1;
                     }
                 }
@@ -142,7 +142,9 @@ int init_stage(stage *st, int s_num, int num_stages,
                 st->argv[st->argc] = calloc_arg;
                 st->argc++;
                 if(st->argc > ARG_MAX + 1){
-                    print_many_args(st->argv[0], stages, full_stages);
+                    st->argc--;
+                    print_many_args(st->argv[0], stages, full_stages, 
+                        num_stages);
                     return -1;
                 }
             }
@@ -150,13 +152,15 @@ int init_stage(stage *st, int s_num, int num_stages,
     }
     /*If returns NULL, there is no command and it's a null error*/
     else{
-        print_null_cmd(stages, full_stages);
+        print_null_cmd(stages, full_stages, num_stages);
         return -1;
     }
     return 0;
 }
 
 
+/*Function that executes the cd command.
+ *No return value, but changes cd only if it is the first command.*/
 void exec_cd(stage *st){
     //make sure there is only one arg to cd
     if(st->argc == 1){
