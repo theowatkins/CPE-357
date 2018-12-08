@@ -47,6 +47,7 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages, gid_t *gid,
             /*ensure that the child does not block SIGINTs*/
             if(sigprocmask(SIG_UNBLOCK, &set, NULL) < 0){
                 perror("set mask in child failed");
+                free_stages(num_of_stages, stages);
                 exit(-1);
             }
 
@@ -90,7 +91,7 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages, gid_t *gid,
                 if(strcmp(stages[num_of_stages - 1]->output, "original stdout")
                          != 0){
                     outfd = creat(stages[num_of_stages - 1]->output, 
-                            S_IRWXU|S_IRGRP|S_IWOTH);
+                            S_IRUSR|S_IWUSR);
                     if(dup2(outfd, 1) < 0){
                         perror("Error with dup2 in output");
                         free_stages(num_of_stages, stages);
@@ -131,42 +132,48 @@ int fork_children(stage *stages[STAGE_MAX], int num_of_stages, gid_t *gid,
                 close(pipe_fds[i - 1][0]);
                 close(pipe_fds[i - 1][1]);
             }
+            /*reset gid for next pipeline*/
+            *gid = 0;
         }
+    }
 
-        /*Need to wait for every child*/
-        int status = 0;
 
-        /*if waitpid appears to error but really it was just an
+    /*Need to wait for the children outside of the loop*/
+    int status[STAGE_MAX] = {0};
+    for(int p = 0; p < num_of_stages; p++){
+         /*if wait appears to error but really it was just an
          * interrupt, wait again.  If not, return error value*/
-        while(waitpid(children[i], &status, 0) != children[i]){
+        if(wait(&status[p]) < 0){
             if(errno != EINTR){
                 perror("error with waitpid");
                 return -1;
             }
         }
-        /*reset gid for next pipeline*/
-        *gid = 0;
+    }
 
+
+    /*Need to check every status to check if one was signalled*/
+    for(int a = 0; a < num_of_stages && status[a] != 0; a++){
         /*Need to check if CTRL+C was signaled*/
-        if(WIFSIGNALED(status)){
-            for(int k = i + 1; k < num_of_stages - 1; k++){
+        if(WIFSIGNALED(status[a])){
+            for(int k = a + 1; k < num_of_stages - 1; k++){
                 close(pipe_fds[k][0]);
                 close(pipe_fds[k][1]);
             }
             return 0;
         }
         /*Need to check if it exited properly*/
-        else if(WIFEXITED(status)){
+        else if(WIFEXITED(status[a])){
             /*Check to see if exec failed*/
-            if(WEXITSTATUS(status) == -1){
-                if(i == 0){
+            if(WEXITSTATUS(status[a]) == -1){
+                if(a == 0){
                     for(int j = 0; j < num_of_stages - 1; j++){
                         close(pipe_fds[j][0]);
                         close(pipe_fds[j][1]);
                     }
                 }
                 else{
-                    for(int k = i; k < num_of_stages - 1; k++ ){
+                    for(int k = a; k < num_of_stages - 1; k++ ){
                         close(pipe_fds[k][0]);
                         close(pipe_fds[k][1]);
                     }
